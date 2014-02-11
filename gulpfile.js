@@ -56,6 +56,7 @@ gulp.task('browserify', function() {
 
     // Wrap in a UMD template if production
     .pipe(production ? wrap({src: 'templates/umd.jst'}, {
+      pkg: pkg,
       namespace: 'Itinerary',
       deps: {underscore: '_'},
       expose: 'itinerary'
