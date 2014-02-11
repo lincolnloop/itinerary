@@ -4,20 +4,28 @@ var _ = require('lodash');
 var browserify = require('gulp-browserify');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
-var lr = require('tiny-lr');
 var path = require('path');
 var pkg = require('./package.json');
-var refresh = require('gulp-livereload');
+var livereload = require('gulp-livereload');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var wrap = require('gulp-wrap');
 
-var server = lr();
-
-
 /*
  * Main tasks
  */
+
+gulp.task('default', ['browserify'], function() {
+  var server = livereload();
+
+  gutil.log(gutil.colors.cyan('Browserify') + ' is watching');
+
+  gulp.watch('{lib,tests}/**/*.js', function(event) {
+    gulp.start('browserify', function() {
+      server.changed(event.path);
+    });
+  });
+});
 
 gulp.task('dist', function() {
   // Set the environment to production
