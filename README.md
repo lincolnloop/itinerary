@@ -6,8 +6,7 @@ decoupled, and (soon to be) enhanced.
 
 The initial goals:
 
-* **Independent** - minimal dependencies, jQuery, Backbone, and Underscore not
-                    required
+* **Independent** - minimal dependencies - jQuery and Backbone not required
 * **Portable** - able to be used with a variety of other libraries
 * **Extensible** - easy to add on additional functionality
 * **Tested** - well tested with Mocha and Chai

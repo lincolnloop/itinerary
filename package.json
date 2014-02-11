@@ -23,9 +23,6 @@
     "backbone",
     "router"
   ],
-  "dependencies": {
-    "underscore": "~1.5.2"
-  },
   "devDependencies": {
     "browserify": "~3.20.0",
     "chai": "~1.8.1",
@@ -35,6 +32,10 @@
     "gulp-uglify": "~0.2.1",
     "tiny-lr": "0.0.5",
     "gulp-livereload": "~1.1.1",
-    "gulp-rename": "~1.0.0"
+    "gulp-rename": "~1.0.0",
+    "gulp-wrap-umd": "~0.1.0"
+  },
+  "dependencies": {
+    "underscore": "~1.6.0"
   }
 }
