@@ -11,7 +11,7 @@ The initial goals:
 * **Extensible** - easy to add on additional functionality
 * **Tested** - well tested with Mocha and Chai
 * **Mobile** - works well with major mobile platforms
-* **Unencumbered** - IE9+, no IE<=8 compatibility shims
+* **Unencumbered** - IE9+, no compatibility shims
 
 Running the tests
 -----------------
