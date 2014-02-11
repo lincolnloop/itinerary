@@ -54,109 +54,109 @@ _.bindAll(ExternalObject, 'routingFunction');
 
 var TestRouter = Router.extend({
 
-    count: 0,
+  count: 0,
 
-    routes: {
-      'noCallback': 'noCallback',
-      'counter': 'counter',
-      'search/:query': 'search',
-      'search/:query/p:page': 'search',
-      'charñ': 'charUTF',
-      'char%C3%B1': 'charEscaped',
-      'contacts': 'contacts',
-      'contacts/new': 'newContact',
-      'contacts/:id': 'loadContact',
-      'route-event/:arg': 'routeEvent',
-      'optional(/:item)': 'optionalItem',
-      'named/optional/(y:z)': 'namedOptional',
-      'splat/*args/end': 'splat',
-      ':repo/compare/*from...*to': 'github',
-      'decode/:named/*splat': 'decode',
-      '*first/complex-*part/*rest': 'complex',
-      'query/:entity': 'query',
-      'function/:value': ExternalObject.routingFunction,
-      '*anything': 'anything'
-    },
+  routes: {
+    'noCallback': 'noCallback',
+    'counter': 'counter',
+    'search/:query': 'search',
+    'search/:query/p:page': 'search',
+    'charñ': 'charUTF',
+    'char%C3%B1': 'charEscaped',
+    'contacts': 'contacts',
+    'contacts/new': 'newContact',
+    'contacts/:id': 'loadContact',
+    'route-event/:arg': 'routeEvent',
+    'optional(/:item)': 'optionalItem',
+    'named/optional/(y:z)': 'namedOptional',
+    'splat/*args/end': 'splat',
+    ':repo/compare/*from...*to': 'github',
+    'decode/:named/*splat': 'decode',
+    '*first/complex-*part/*rest': 'complex',
+    'query/:entity': 'query',
+    'function/:value': ExternalObject.routingFunction,
+    '*anything': 'anything'
+  },
 
-    initialize : function(options) {
-      this.testing = options.testing;
-      this.route('implicit', 'implicit');
-    },
+  initialize : function(options) {
+    this.testing = options.testing;
+    this.route('implicit', 'implicit');
+  },
 
-    counter: function() {
-      this.count++;
-    },
+  counter: function() {
+    this.count++;
+  },
 
-    implicit: function() {
-      this.count++;
-    },
+  implicit: function() {
+    this.count++;
+  },
 
-    search: function(query, page) {
-      this.query = query;
-      this.page = page;
-    },
+  search: function(query, page) {
+    this.query = query;
+    this.page = page;
+  },
 
-    charUTF: function() {
-      this.charType = 'UTF';
-    },
+  charUTF: function() {
+    this.charType = 'UTF';
+  },
 
-    charEscaped: function() {
-      this.charType = 'escaped';
-    },
+  charEscaped: function() {
+    this.charType = 'escaped';
+  },
 
-    contacts: function(){
-      this.contact = 'index';
-    },
+  contacts: function(){
+    this.contact = 'index';
+  },
 
-    newContact: function(){
-      this.contact = 'new';
-    },
+  newContact: function(){
+    this.contact = 'new';
+  },
 
-    loadContact: function(){
-      this.contact = 'load';
-    },
+  loadContact: function(){
+    this.contact = 'load';
+  },
 
-    optionalItem: function(arg){
-      this.arg = arg !== void 0 ? arg : null;
-    },
+  optionalItem: function(arg){
+    this.arg = arg !== void 0 ? arg : null;
+  },
 
-    splat: function(args) {
-      this.args = args;
-    },
+  splat: function(args) {
+    this.args = args;
+  },
 
-    github: function(repo, from, to) {
-      this.repo = repo;
-      this.from = from;
-      this.to = to;
-    },
+  github: function(repo, from, to) {
+    this.repo = repo;
+    this.from = from;
+    this.to = to;
+  },
 
-    complex: function(first, part, rest) {
-      this.first = first;
-      this.part = part;
-      this.rest = rest;
-    },
+  complex: function(first, part, rest) {
+    this.first = first;
+    this.part = part;
+    this.rest = rest;
+  },
 
-    query: function(entity, args) {
-      this.entity    = entity;
-      this.queryArgs = args;
-    },
+  query: function(entity, args) {
+    this.entity    = entity;
+    this.queryArgs = args;
+  },
 
-    anything: function(whatever) {
-      this.anything = whatever;
-    },
+  anything: function(whatever) {
+    this.anything = whatever;
+  },
 
-    namedOptional: function(z) {
-      this.z = z;
-    },
+  namedOptional: function(z) {
+    this.z = z;
+  },
 
-    decode: function(named, path) {
-      this.named = named;
-      this.path = path;
-    },
+  decode: function(named, path) {
+    this.named = named;
+    this.path = path;
+  },
 
-    routeEvent: function() {}
+  routeEvent: function() {}
 
-  });
+});
 
 describe('Router', function() {
 
@@ -179,7 +179,7 @@ describe('Router', function() {
   // I'm including the tests here pretty much as-is, with chai expect directly
   // subbed in for qunit.
 
-  it('initialize', 1, function() {
+  it('initialize', function() {
     expect(router.testing).to.equal(101);
   });
 
