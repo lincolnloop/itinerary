@@ -1,16 +1,30 @@
 
 
-(function(root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define(["require","exports","module","underscore"], factory);
-  } else if (typeof exports === 'object') {
-    module.exports = factory(require('require'),require('exports'),require('module'),require('underscore'));
-  } else {
-    root.Itinerary.Router = factory(root.require,root.exports,root.module,root.underscore);
-  }
-}(this, function(require,exports,module,_) {
 
-return require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"F9UmcE":[function(require,module,exports){
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(underscorefactory);
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require('underscore'));
+  } else {
+    // Browser globals (root is window)
+    root.Itinerary = factory(root._);
+  }
+}(this, function (_) {
+
+  // A shim for 'require' so that it will work universally for externals
+  var require = function(name) {
+    return {underscore: _}[name];
+  };
+
+/*
+ * -------- Begin module --------
+ */
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"F9UmcE":[function(require,module,exports){
 /*
  * Itinerary v0.0.1
  * (c) 2014 Brandon Konkle
@@ -222,8 +236,115 @@ module.exports = Events;
 var _ = require('underscore');
 var Events = require('./events');
 
+// Backbone.Router
+// ---------------
+
+// Routers map faux-URLs to actions, and fire events when routes are
+// matched. Creating a new one sets its `routes` hash, if not set statically.
+var Router = function(options) {
+  options || (options = {});
+  if (options.routes) this.routes = options.routes;
+  this._bindRoutes();
+  this.initialize.apply(this, arguments);
+};
+
+// Cached regular expressions for matching named param parts and splatted
+// parts of route strings.
+var optionalParam = /\((.*?)\)/g;
+var namedParam    = /(\(\?)?:\w+/g;
+var splatParam    = /\*\w+/g;
+var escapeRegExp  = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+// Set up all inheritable **Backbone.Router** properties and methods.
+_.extend(Router.prototype, Events, {
+
+  // Initialize is an empty function by default. Override it with your own
+  // initialization logic.
+  initialize: function(){},
+
+  // Manually bind a single named route to a callback. For example:
+  //
+  //     this.route('search/:query/p:num', 'search', function(query, num) {
+  //       ...
+  //     });
+  //
+  route: function(route, name, callback) {
+    if (!_.isRegExp(route)) route = this._routeToRegExp(route);
+    if (_.isFunction(name)) {
+      callback = name;
+      name = '';
+    }
+    if (!callback) callback = this[name];
+    var router = this;
+    Backbone.history.route(route, function(fragment) {
+      var args = router._extractParameters(route, fragment);
+      router.execute(callback, args);
+      router.trigger.apply(router, ['route:' + name].concat(args));
+      router.trigger('route', name, args);
+      Backbone.history.trigger('route', router, name, args);
+    });
+    return this;
+  },
+
+  // Execute a route handler with the provided parameters.  This is an
+  // excellent place to do pre-route setup or post-route cleanup.
+  execute: function(callback, args) {
+    if (callback) callback.apply(this, args);
+  },
+
+  // Simple proxy to `Backbone.history` to save a fragment into the history.
+  navigate: function(fragment, options) {
+    Backbone.history.navigate(fragment, options);
+    return this;
+  },
+
+  // Bind all defined routes to `Backbone.history`. We have to reverse the
+  // order of the routes here to support behavior where the most general
+  // routes can be defined at the bottom of the route map.
+  _bindRoutes: function() {
+    if (!this.routes) return;
+    this.routes = _.result(this, 'routes');
+    var route, routes = _.keys(this.routes);
+    while ((route = routes.pop()) != null) {
+      this.route(route, this.routes[route]);
+    }
+  },
+
+  // Convert a route string into a regular expression, suitable for matching
+  // against the current location hash.
+  _routeToRegExp: function(route) {
+    route = route.replace(escapeRegExp, '\\$&')
+                 .replace(optionalParam, '(?:$1)?')
+                 .replace(namedParam, function(match, optional) {
+                   return optional ? match : '([^/?]+)';
+                 })
+                 .replace(splatParam, '([^?]*?)');
+    return new RegExp('^' + route + '(?:\\?(.*))?$');
+  },
+
+  // Given a route, and a URL fragment that it matches, return the array of
+  // extracted decoded parameters. Empty or unmatched parameters will be
+  // treated as `null` to normalize cross-browser behavior.
+  _extractParameters: function(route, fragment) {
+    var params = route.exec(fragment).slice(1);
+    return _.map(params, function(param, i) {
+      // Don't decode the search params.
+      if (i === params.length - 1) return param || null;
+      return param ? decodeURIComponent(param) : null;
+    });
+  }
+
+});
+
+module.exports = Router;
+
 },{"./events":3}],5:[function(require,module,exports){
 
-},{}]},{},["F9UmcE"]);
+},{}]},{},["F9UmcE"])
+/*
+ * -------- End module --------
+ */
+
+  return require('itinerary');
 
 }));

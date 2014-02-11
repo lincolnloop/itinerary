@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var browserify = require('gulp-browserify');
 var gulp = require('gulp');
 var gutil = require('gulp-util');
@@ -9,7 +10,7 @@ var pkg = require('./package.json');
 var refresh = require('gulp-livereload');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
-var wrap = require('gulp-wrap-umd');
+var wrap = require('gulp-wrap');
 
 var server = lr();
 
@@ -19,9 +20,8 @@ var server = lr();
  */
 
 gulp.task('dist', function() {
-  if (gutil.env.type !== 'production') {
-    throw new Error('This task only works with the --type=production option');
-  }
+  // Set the environment to production
+  gutil.env.type = 'production';
   gulp.start('uglify');
 });
 
@@ -45,8 +45,8 @@ gulp.task('browserify', function() {
         // Externalize underscore
         bundler.external('underscore');
 
-        // Export the Router (using a __dirname workaround because
-        // the value './index.js' doesn't work)
+        // Export the Router (using a __dirname workaround because the value
+        // './index.js' doesn't work)
         bundler.require(path.resolve(__dirname, 'index.js'), {expose: 'itinerary'});
       }
     })
@@ -54,12 +54,12 @@ gulp.task('browserify', function() {
     // Rename the destination file
     .pipe(rename(pkg.name + '.js'))
 
-    // Wrap in UMD if production
-    .pipe(production ? wrap({
-      deps: ['require', 'exports', 'module', 'underscore'],
-      params: ['require', 'exports', 'module', '_'],
-      namespace: 'Itinerary.Router'
-    }) : gutil.noop())
+    // Wrap in a UMD template if production
+    .pipe(production ? wrap({src: 'templates/umd.jst'}, {
+      namespace: 'Itinerary',
+      deps: {underscore: '_'},
+      expose: 'itinerary'
+    }, {'imports': {'_': _}}) : gutil.noop())
 
     // Dist directory if production, otherwise the ignored build dir
     .pipe(gulp.dest(production ? 'dist/' : 'build/'));
