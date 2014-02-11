@@ -1,0 +1,40 @@
+{
+  "name": "itinerary",
+  "description": "Lightweight routing forked from Backbone, decoupled, and (soon to be) enhanced.",
+  "version": "0.0.1",
+  "author": "Brandon Konkle (http://konkle.us/)",
+  "homepage": "https://github.com/bkonkle/itinerary",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bkonkle/itinerary.git"
+  },
+  "bugs": {
+    "url": "http://github.com/bkonkle/itinerary/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/bkonkle/itinerary/blob/master/LICENSE"
+    }
+  ],
+  "main": "index.js",
+  "keywords": [
+    "client side",
+    "backbone",
+    "router"
+  ],
+  "dependencies": {
+    "underscore": "~1.5.2"
+  },
+  "devDependencies": {
+    "browserify": "~3.20.0",
+    "chai": "~1.8.1",
+    "mocha": "~1.17.0",
+    "gulp": "~3.5.2",
+    "gulp-util": "~2.2.14",
+    "gulp-uglify": "~0.2.1",
+    "tiny-lr": "0.0.5",
+    "gulp-livereload": "~1.1.1",
+    "gulp-rename": "~1.0.0"
+  }
+}
