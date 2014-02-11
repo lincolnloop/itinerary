@@ -4,6 +4,7 @@
 var _ = require('underscore');
 var History = require('../lib/history');
 var Router = require('../lib/router');
+var sinon = require('sinon');
 
 var router, location, lastRoute;
 var lastArgs = [];
@@ -162,18 +163,18 @@ describe('Router', function() {
 
   before(function() {
     location = new Location('http://example.com');
+    Router.history = _.extend(new History(), {location: location});
     router = new TestRouter({testing: 101});
-    router.history = _.extend(new History(), {location: location});
-    router.history.interval = 9;
-    router.history.start({pushState: false});
+    Router.history.interval = 9;
+    Router.history.start({pushState: false});
     lastRoute = null;
     lastArgs = [];
-    router.history.on('route', onRoute);
+    Router.history.on('route', onRoute);
   });
 
   after(function() {
-    router.history.stop();
-    router.history.off('route', onRoute);
+    Router.history.stop();
+    Router.history.off('route', onRoute);
   });
 
   // I'm including the tests here pretty much as-is, with chai expect directly
@@ -183,71 +184,80 @@ describe('Router', function() {
     expect(router.testing).to.equal(101);
   });
 
-  // test("routes (simple)", 4, function() {
-  //   location.replace('http://example.com#search/news');
-  //   Backbone.history.checkUrl();
-  //   equal(router.query, 'news');
-  //   equal(router.page, void 0);
-  //   equal(lastRoute, 'search');
-  //   equal(lastArgs[0], 'news');
-  // });
+  it('routes (simple)', function() {
+    location.replace('http://example.com#search/news');
+    console.log(Router.history.root);
+    Router.history.checkUrl();
+    expect(router.query).to.equal('news');
+    expect(router.page).to.not.exist;
+    expect(lastRoute).to.equal('search');
+    expect(lastArgs[0]).to.equal('news');
+  });
 
-  // test("routes (simple, but unicode)", 4, function() {
-  //   location.replace('http://example.com#search/тест');
-  //   Backbone.history.checkUrl();
-  //   equal(router.query, "тест");
-  //   equal(router.page, void 0);
-  //   equal(lastRoute, 'search');
-  //   equal(lastArgs[0], "тест");
-  // });
+  it('routes (simple, but unicode)', function() {
+    location.replace('http://example.com#search/тест');
+    Router.history.checkUrl();
+    expect(router.query).to.equal('тест');
+    expect(router.page).to.not.exist;
+    expect(lastRoute).to.equal('search');
+    expect(lastArgs[0]).to.equal('тест');
+  });
 
-  // test("routes (two part)", 2, function() {
-  //   location.replace('http://example.com#search/nyc/p10');
-  //   Backbone.history.checkUrl();
-  //   equal(router.query, 'nyc');
-  //   equal(router.page, '10');
-  // });
+  it('routes (two part)', function() {
+    location.replace('http://example.com#search/nyc/p10');
+    Router.history.checkUrl();
+    expect(router.query).to.equal('nyc');
+    expect(router.page).to.equal('10');
+  });
 
-  // test("routes via navigate", 2, function() {
-  //   Backbone.history.navigate('search/manhattan/p20', {trigger: true});
-  //   equal(router.query, 'manhattan');
-  //   equal(router.page, '20');
-  // });
+  it('routes via navigate', function() {
+    Router.history.navigate('search/manhattan/p20', {trigger: true});
+    expect(router.query).to.equal('manhattan');
+    expect(router.page).to.equal('20');
+  });
 
-  // test("routes via navigate with params", 1, function() {
-  //   Backbone.history.navigate('query/test?a=b', {trigger: true});
-  //   equal(router.queryArgs, 'a=b');
-  // });
+  it('routes via navigate with params', function() {
+    Router.history.navigate('query/test?a=b', {trigger: true});
+    expect(router.queryArgs).to.equal('a=b');
+  });
 
-  // test("routes via navigate for backwards-compatibility", 2, function() {
-  //   Backbone.history.navigate('search/manhattan/p20', true);
-  //   equal(router.query, 'manhattan');
-  //   equal(router.page, '20');
-  // });
+  it('routes via navigate for backwards-compatibility', function() {
+    Router.history.navigate('search/manhattan/p20', true);
+    expect(router.query).to.equal('manhattan');
+    expect(router.page).to.equal('20');
+  });
 
-  // test("reports matched route via nagivate", 1, function() {
-  //   ok(Backbone.history.navigate('search/manhattan/p20', true));
-  // });
+  it('reports matched route via nagivate', function() {
+    var nav = function() {
+      Router.history.navigate('search/manhattan/p20', true);
+    };
+    expect(nav).to.not.throw(Error);
+  });
 
-  // test("route precedence via navigate", 6, function(){
-  //   // check both 0.9.x and backwards-compatibility options
-  //   _.each([ { trigger: true }, true ], function( options ){
-  //     Backbone.history.navigate('contacts', options);
-  //     equal(router.contact, 'index');
-  //     Backbone.history.navigate('contacts/new', options);
-  //     equal(router.contact, 'new');
-  //     Backbone.history.navigate('contacts/foo', options);
-  //     equal(router.contact, 'load');
-  //   });
-  // });
+  it('route precedence via navigate', function(){
+    // check both 0.9.x and backwards-compatibility options
+    _.each([ { trigger: true }, true ], function( options ){
+      Router.history.navigate('contacts', options);
+      expect(router.contact).to.equal('index');
+      Router.history.navigate('contacts/new', options);
+      expect(router.contact).to.equal('new');
+      Router.history.navigate('contacts/foo', options);
+      expect(router.contact).equal('load');
+    });
+  });
 
-  // test("loadUrl is not called for identical routes.", 0, function() {
-  //   Backbone.history.loadUrl = function(){ ok(false); };
-  //   location.replace('http://example.com#route');
-  //   Backbone.history.navigate('route');
-  //   Backbone.history.navigate('/route');
-  //   Backbone.history.navigate('/route');
-  // });
+  it('loadUrl is not called for identical routes.', function() {
+    sinon.spy(Router.history, 'loadUrl');
+
+    location.replace('http://example.com#route');
+    Router.history.navigate('route');
+    Router.history.navigate('/route');
+    Router.history.navigate('/route');
+
+    expect(Router.history.loadUrl.called).to.be.false;
+
+    Router.history.loadUrl.restore();
+  });
 
   // test("use implicit callback if none provided", 1, function() {
   //   router.count = 0;
